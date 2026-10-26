@@ -1,0 +1,23 @@
+{
+  "slug": "Burn",
+  "name": "Burn",
+  "version": "2.0.0",
+  "license": "proprietary",
+  "brand": "Burn",
+  "author": "Beto",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "Burn",
+      "name": "Burn",
+      "description": "Dual function generator with VCAs: attack, decay, shape, LFO mode, slew input, end of cycle and sum",
+      "tags": ["Envelope generator", "LFO", "VCA", "Slew limiter", "Dual"]
+    }
+  ]
+}
