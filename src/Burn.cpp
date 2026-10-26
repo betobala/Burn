@@ -134,15 +134,40 @@ static std::shared_ptr<window::Font> pluginFont(const char* file) {
 	return f;
 }
 
-// ---------------------------------------------------------------- layout (mm), 10 HP, after the manual's panel
+// ---------------------------------------------------------------- layout (mm), 10 HP, after concept light v1
 static const float W = 50.8f;
 static const float CX = W / 2.f;
-static const float KX[2] = {13.4f, 37.4f};       // knob columns, channel 1 and 2
-static const float Y_ATTACK = 19.0f, Y_DECAY = 34.0f, Y_SHAPE = 53.0f, Y_TRIM = 65.4f;
-static const float LFO_X[2] = {4.6f, 46.2f};
-static const float JX[5] = {6.2f, 15.8f, 25.4f, 35.0f, 44.6f};
-static const float ROW_A = 79.0f, ROW_B = 94.0f, ROW_C = 111.0f;
-static const float BIG_R = 5.2f, SHAPE_R = 4.4f, TRIM_R = 2.6f;
+static const float KX[2] = {13.1f, 37.7f};        // attack/decay columns
+static const float SX[2] = {17.4f, 33.4f};        // shape knobs, a little inwards
+static const float LFO_X[2] = {5.4f, 45.4f};      // mode switches at the outer edges
+static const float Y_ATTACK = 18.4f, Y_DECAY = 35.4f, Y_SHAPE = 57.0f, Y_TRIM = 70.4f;
+static const float JX[5] = {6.6f, 16.0f, 25.4f, 34.8f, 44.2f};
+static const float ROW_A = 84.4f, ROW_B = 99.0f, ROW_C = 113.6f;
+static const float BIG_R = 6.0f, SHAPE_R = 4.4f, TRIM_R = 2.8f;
+
+/** The logotype, one SVG per theme. */
+struct LogoWidget : TransparentWidget {
+	Burn* module = nullptr;
+	std::shared_ptr<window::Svg> svg[2];
+
+	void load(float widthMm) {
+		svg[0] = window::Svg::load(asset::plugin(pluginInstance, "res/logo_bone.svg"));
+		svg[1] = window::Svg::load(asset::plugin(pluginInstance, "res/logo_slate.svg"));
+		float w = svg[0]->handle->width, h = svg[0]->handle->height;
+		box.size = Vec(mm2px(widthMm), mm2px(widthMm) * h / w);
+	}
+
+	void draw(const DrawArgs& args) override {
+		int i = (module && module->theme == 1) ? 1 : 0;
+		if (!svg[i])
+			return;
+		float sc = box.size.x / svg[i]->handle->width;
+		nvgSave(args.vg);
+		nvgScale(args.vg, sc, sc);
+		window::svgDraw(args.vg, svg[i]->handle);
+		nvgRestore(args.vg);
+	}
+};
 
 struct PanelArt : Widget {
 	Burn* module = nullptr;
@@ -180,46 +205,66 @@ struct PanelArt : Widget {
 		nvgFillColor(vg, k.panel);
 		nvgFill(vg);
 
-		// one group per channel for the knobs, the jack field in two groups, the outputs on a plate
-		// attack and decay of each channel in a group; shape, mode, level and link on the bare panel
-		group(vg, Rect(Vec(1.6f, 11.0f), Vec(CX - 2.4f, 33.4f)), k);
-		group(vg, Rect(Vec(CX + 0.8f, 11.0f), Vec(CX - 2.4f, 33.4f)), k);
-		group(vg, Rect(Vec(1.6f, ROW_A - 5.4f), Vec(W - 3.2f, 13.4f)), k);
-		group(vg, Rect(Vec(1.6f, ROW_B - 5.4f), Vec(W - 3.2f, 13.4f)), k);
+		// attack and decay of each channel in a tall group; a hairline splits the channels below it
+		group(vg, Rect(Vec(1.6f, 9.8f), Vec(CX - 2.4f, 37.6f)), k);
+		group(vg, Rect(Vec(CX + 0.8f, 9.8f), Vec(CX - 2.4f, 37.6f)), k);
 		nvgBeginPath(vg);
-		nvgRoundedRect(vg, mm2px(1.6f), mm2px(ROW_C - 5.4f), mm2px(W - 3.2f), mm2px(13.4f), mm2px(2.2f));
+		nvgMoveTo(vg, mm2px(CX), mm2px(48.6f));
+		nvgLineTo(vg, mm2px(CX), mm2px(64.4f));
+		nvgStrokeColor(vg, k.line);
+		nvgStrokeWidth(vg, mm2px(0.2f));
+		nvgStroke(vg);
+		// levels and link, then the jack field; the outputs in the black box
+		group(vg, Rect(Vec(1.6f, 65.6f), Vec(W - 3.2f, 13.0f)), k);
+		group(vg, Rect(Vec(1.6f, ROW_A - 4.6f), Vec(W - 3.2f, 13.0f)), k);
+		group(vg, Rect(Vec(1.6f, ROW_B - 4.6f), Vec(W - 3.2f, 13.0f)), k);
+		nvgBeginPath(vg);
+		nvgRoundedRect(vg, mm2px(1.6f), mm2px(ROW_C - 4.6f), mm2px(W - 3.2f), mm2px(13.0f), mm2px(2.2f));
 		nvgFillColor(vg, k.plate);
 		nvgFill(vg);
 
-		std::shared_ptr<window::Font> logo = pluginFont("Syne-Bold.ttf");
+		// the shape scale: an arc with three dots (exp, lin, log) over each shape knob
+		for (int i = 0; i < 2; i++) {
+			float cx = mm2px(SX[i]), cy = mm2px(Y_SHAPE), r = mm2px(SHAPE_R + 2.2f);
+			nvgBeginPath(vg);
+			nvgArc(vg, cx, cy, r, -M_PI / 2 - 1.0f, -M_PI / 2 + 1.0f, NVG_CW);
+			nvgStrokeColor(vg, k.ink);
+			nvgStrokeWidth(vg, mm2px(0.25f));
+			nvgStroke(vg);
+			for (int d = -1; d <= 1; d++) {
+				float a = -M_PI / 2 + d * 1.0f;
+				nvgBeginPath(vg);
+				nvgCircle(vg, cx + std::cos(a) * r, cy + std::sin(a) * r, mm2px(0.55f));
+				nvgFillColor(vg, k.ink);
+				nvgFill(vg);
+			}
+		}
+
 		std::shared_ptr<window::Font> bold = pluginFont("SpaceMono-Bold.ttf");
 		std::shared_ptr<window::Font> reg = pluginFont("SpaceMono-Regular.ttf");
-		if (!logo || !bold || !reg)
+		if (!bold || !reg)
 			return;
 		nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
-		nvgFontFaceId(vg, logo->handle);
-		nvgFontSize(vg, mm2px(4.8f));
-		nvgTextLetterSpacing(vg, -mm2px(0.1f));
-		nvgFillColor(vg, k.ink);
-		text(vg, Vec(CX, 5.6f), "burn");
-		// the delta: a small accent triangle after the name
-		float tx = mm2px(CX + 7.6f), ty = mm2px(5.7f), ts = mm2px(1.5f);
-		nvgBeginPath(vg);
-		nvgMoveTo(vg, tx, ty - ts);
-		nvgLineTo(vg, tx + ts, ty + ts * 0.8f);
-		nvgLineTo(vg, tx - ts, ty + ts * 0.8f);
-		nvgClosePath(vg);
-		nvgFillColor(vg, k.accent);
-		nvgFill(vg);
-
 		nvgTextLetterSpacing(vg, mm2px(0.06f));
+		nvgFontFaceId(vg, reg->handle);
+		nvgFontSize(vg, mm2px(1.9f));
+		nvgFillColor(vg, k.ink);
+		for (int i = 0; i < 2; i++) {
+			float r = SHAPE_R + 2.2f;
+			text(vg, Vec(SX[i] - std::sin(1.0f) * r - 2.6f, Y_SHAPE - std::cos(1.0f) * r - 0.6f), "exp");
+			text(vg, Vec(SX[i] + std::sin(1.0f) * r + 2.6f, Y_SHAPE - std::cos(1.0f) * r - 0.6f), "log");
+		}
+
 		nvgFontFaceId(vg, bold->handle);
 		nvgFontSize(vg, mm2px(2.3f));
 		for (int i = 0; i < 2; i++) {
-			pill(vg, Vec(KX[i], Y_ATTACK + BIG_R + 2.6f), "ATTACK", k.pill, k.pillInk);
-			pill(vg, Vec(KX[i], Y_DECAY + BIG_R + 2.6f), "DECAY", k.pill, k.pillInk);
-			pill(vg, Vec(KX[i], Y_SHAPE + SHAPE_R + 2.4f), "SHAPE", k.pill, k.pillInk);
+			pill(vg, Vec(KX[i], Y_ATTACK + BIG_R + 2.4f), "ATTACK", k.pill, k.pillInk);
+			pill(vg, Vec(KX[i], Y_DECAY + BIG_R + 2.4f), "DECAY", k.pill, k.pillInk);
+			pill(vg, Vec(SX[i], Y_SHAPE + SHAPE_R + 2.4f), "SHAPE", k.pill, k.pillInk);
+			pill(vg, Vec(LFO_X[i], Y_SHAPE + 5.6f), "LFO", k.pill, k.pillInk);
+			pill(vg, Vec(KX[i], Y_TRIM + TRIM_R + 2.4f), string::f("LEVEL %d", i + 1).c_str(), k.pill, k.pillInk);
 		}
+		pill(vg, Vec(CX, Y_TRIM + TRIM_R + 2.4f), "LINK", k.pill, k.pillInk);
 		const char* rowA[5] = {"TRIG", "SLEW", "VCA 1", "TRIG", "SLEW"};
 		const char* rowB[5] = {"ATK", "DEC", "VCA 2", "ATK", "DEC"};
 		const char* rowC[5] = {"OUT 1", "EOC 1", "SUM", "OUT 2", "EOC 2"};
@@ -228,21 +273,6 @@ struct PanelArt : Widget {
 			pill(vg, Vec(JX[j], ROW_B + 5.0f), rowB[j], k.pill, k.pillInk);
 			pill(vg, Vec(JX[j], ROW_C + 5.0f), rowC[j], k.plateInk, k.plate);
 		}
-
-		nvgFontFaceId(vg, reg->handle);
-		nvgFontSize(vg, mm2px(2.0f));
-		nvgFillColor(vg, k.ink);
-		for (int i = 0; i < 2; i++) {
-			// the shape scale over the knob: exp at the left end of the travel, lin at the top, log at the right
-			text(vg, Vec(KX[i] - 5.4f, Y_SHAPE - 5.0f), "exp");
-			text(vg, Vec(KX[i], Y_SHAPE - 6.6f), "lin");
-			text(vg, Vec(KX[i] + 5.4f, Y_SHAPE - 5.0f), "log");
-			text(vg, Vec(KX[i] - TRIM_R - 2.2f, Y_TRIM), "-");
-			text(vg, Vec(KX[i] + TRIM_R + 2.2f, Y_TRIM), "+");
-			text(vg, Vec(LFO_X[i], Y_SHAPE - 5.6f), "lfo");
-			text(vg, Vec(LFO_X[i], Y_SHAPE + 5.6f), "1x");
-		}
-		text(vg, Vec(CX, Y_TRIM + 4.6f), "link");
 		nvgTextLetterSpacing(vg, 0.f);
 	}
 };
@@ -262,10 +292,16 @@ struct BurnWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
+		LogoWidget* logo = new LogoWidget;
+		logo->module = module;
+		logo->load(17.0f);
+		logo->box.pos = Vec((box.size.x - logo->box.size.x) / 2, mm2px(2.6f));
+		addChild(logo);
+
 		for (int i = 0; i < 2; i++) {
 			addParam(fms::knob(mm2px(Vec(KX[i], Y_ATTACK)), module, Burn::ATTACK_PARAM + i, BIG_R));
 			addParam(fms::knob(mm2px(Vec(KX[i], Y_DECAY)), module, Burn::DECAY_PARAM + i, BIG_R));
-			addParam(fms::knob(mm2px(Vec(KX[i], Y_SHAPE)), module, Burn::SHAPE_PARAM + i, SHAPE_R));
+			addParam(fms::knob(mm2px(Vec(SX[i], Y_SHAPE)), module, Burn::SHAPE_PARAM + i, SHAPE_R, false));
 			addParam(fms::knob(mm2px(Vec(KX[i], Y_TRIM)), module, Burn::ATTEN_PARAM + i, TRIM_R, false));
 			addParam(createParamCentered<fms::Toggle>(mm2px(Vec(LFO_X[i], Y_SHAPE)), module, Burn::LFO_PARAM + i));
 		}

@@ -1,0 +1,14 @@
+CODEX_IMAGE_OK burn_light v1 -> docs\art\source\style_v1\burn_light__v1.png [793, 1983]
+CODEX_IMAGE_OK burn_light v2 -> docs\art\source\style_v1\burn_light__v2.png [790, 1989]
+CODEX_IMAGE_OK burn_dark v1 -> docs\art\source\style_v1\burn_dark__v1.png [790, 1991]
+CODEX_IMAGE_FAILED burn_dark v2: no image (thread 01a17a65-ad00-7532-9a76-1d8a879180c5)
+exit 0
+www\\tucunare_game.enabled` is ignored.\n  user (C:\\Users\\beto-\\.codex\\config.toml): `projects.c:\\users\\beto-\\www\\tucunare_game.startup_timeout_sec` is ignored.\n  user (C:\\Users\\beto-\\.codex\\config.toml): `projects.c:\\users\\beto-\\www\\tucunare_game.tool_timeout_sec` is ignored."}}
+{"type":"item.completed","item":{"id":"item_1","type":"error","message":"Codex is ignoring 3 unrecognized configuration settings. Check for typos or deprecated settings.\n  user (C:\\Users\\beto-\\.codex\\config.toml): `projects.c:\\users\\beto-\\www\\tucunare_game.enabled` is ignored.\n  user (C:\\Users\\beto-\\.codex\\config.toml): `projects.c:\\users\\beto-\\www\\tucunare_game.startup_timeout_sec` is ignored.\n  user (C:\\Users\\beto-\\.codex\\config.toml): `projects.c:\\users\\beto-\\www\\tucunare_game.tool_timeout_sec` is ignored."}}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"I can’t generate the image in this turn because the image-generation tool isn’t available."}}
+{"type":"turn.completed","usage":{"input_tokens":17416,"cached_input_tokens":12672,"cache_write_input_tokens":0,"output_tokens":22,"reasoning_output_tokens":0}}
+
+
+skip docs\art\source\style_v1\burn_dark__v1.png (exists; --force regenerates)
+CODEX_IMAGE_OK burn_dark v2 -> docs\art\source\style_v1\burn_dark__v2.png [793, 1983]

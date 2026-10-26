@@ -1,0 +1,29 @@
+{
+ "batch": "style_v1",
+ "originals": "docs/art/source/style_v1",
+ "defaults": {
+  "variants": 2,
+  "inputs": [
+   {
+    "path": "docs/art/source/refs/ref_4ms_ensemble_oscillator.png",
+    "role": "style reference only: copy its line weight, rounded outlined groups, black pill sublabels, black knobs and black output box. Do NOT copy its layout, control count, text, logos or colours."
+   }
+  ]
+ },
+ "jobs": [
+  {
+   "id": "burn_light",
+   "kind": "illustration",
+   "style": "Style: a flat, high-contrast product illustration of a Eurorack module front panel, drawn in the visual language of the attached reference: warm bone panel #E8E6E1, bold uniform near-black outlines about 2 px, related controls grouped inside rounded rectangles with dark outlines, matte black knobs with one thin white pointer line, small black pill-shaped sublabels, one black rounded box holding the output jacks which sit in white rings, no gradients across the panel, no ornaments, only a soft contact shadow under controls. Palette: bone #E8E6E1, ink #0F1216, grey #6E7177, exactly one accent colour signal orange #F0551E used only for one tiny triangle mark near the logo area.",
+   "subject": "Subject: the complete front panel of a Eurorack module, 10 HP (51 mm wide, 128.5 mm tall), seen perfectly straight on, filling the whole image, no rack, no hands. Two mirrored channels side by side. Top half: for each channel a rounded outlined group with two large black knobs stacked vertically, each with a pill sublabel; below the groups, for each channel a smaller black knob with a tiny three-point scale arc above it and a small black toggle switch at the outer edge; below that a row with two tiny black trimmer knobs and one small toggle switch in the centre between them. Bottom part: a rounded outlined group with a row of five round jacks with pill sublabels, a second rounded outlined group with another row of five jacks, and at the bottom a black rounded box holding five output jacks in white rings. Strict five-column grid for the jacks. A small blank logo area at the very top. All labels are blank short black bars and pills, no letters or numbers.",
+   "selected": 1
+  },
+  {
+   "id": "burn_dark",
+   "kind": "illustration",
+   "style": "Style: a flat, high-contrast product illustration of a Eurorack module front panel in the visual language of the attached reference but on a dark graphite panel #17191B with light grey outlines #6B6F75, rounded outlined groups, matte black knobs with a white pointer, light pill sublabels, one near-black box for the outputs. No gradients, no ornaments. Palette: graphite, light ink #E6E8E8, exactly one accent colour signal orange #FF7A45 for one tiny triangle mark.",
+   "subject": "Subject: the complete front panel of a Eurorack module, 10 HP (51 mm wide, 128.5 mm tall), seen perfectly straight on, filling the whole image, no rack, no hands. Two mirrored channels side by side. Top half: for each channel a rounded outlined group with two large black knobs stacked vertically, each with a pill sublabel; below the groups, for each channel a smaller black knob with a tiny three-point scale arc above it and a small toggle switch at the outer edge; below that a row with two tiny trimmer knobs and one small toggle switch in the centre. Bottom part: a rounded outlined group with a row of five round jacks with pill sublabels, a second rounded outlined group with another row of five jacks, and at the bottom a near-black rounded box holding five output jacks in light rings. Strict five-column grid for the jacks. A small blank logo area at the very top. All labels are blank short light bars and pills, no letters or numbers.",
+   "selected": 1
+  }
+ ]
+}
