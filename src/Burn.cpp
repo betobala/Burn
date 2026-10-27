@@ -153,23 +153,27 @@ struct PanelArt : Widget {
 		}
 
 		std::shared_ptr<window::Font> stencil = pluginFont("BlackOpsOne-Regular.ttf");
-		std::shared_ptr<window::Font> reg = pluginFont("SpaceMono-Regular.ttf");
-		std::shared_ptr<window::Font> bold = pluginFont("SpaceMono-Bold.ttf");
+		std::shared_ptr<window::Font> reg = pluginFont("BebasNeue-Regular.ttf");
+		std::shared_ptr<window::Font> bold = pluginFont("BebasNeue-Regular.ttf");
 		if (!stencil || !reg || !bold)
 			return;
 		bb::nameplate(vg, CX, 4.4f, "BURN", stencil->handle, k, 4.4f);
 		nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 		nvgFontFaceId(vg, reg->handle);
-		nvgFontSize(vg, mm2px(1.9f));
+		// exp / log at the outer ends of the scale arcs
+		nvgFontSize(vg, mm2px(2.8f));
 		nvgFillColor(vg, k.dim);
 		for (int i = 0; i < 2; i++) {
 			float r = SHAPE_R + 2.2f;
-			text(vg, Vec(SX[i] - std::sin(1.0f) * r - 2.6f, Y_SHAPE - std::cos(1.0f) * r - 0.6f), "exp");
-			text(vg, Vec(SX[i] + std::sin(1.0f) * r + 2.6f, Y_SHAPE - std::cos(1.0f) * r - 0.6f), "log");
+			// only the outer end of each arc is labelled; both arcs run exp -> lin -> log
+			if (i == 0)
+				text(vg, Vec(SX[i] - std::sin(1.0f) * r - 1.2f, Y_SHAPE - std::cos(1.0f) * r - 1.4f), "exp");
+			else
+				text(vg, Vec(SX[i] + std::sin(1.0f) * r + 1.2f, Y_SHAPE - std::cos(1.0f) * r - 1.4f), "log");
 		}
 
 		nvgFontFaceId(vg, bold->handle);
-		nvgFontSize(vg, mm2px(2.4f));
+		nvgFontSize(vg, mm2px(4.8f));
 		nvgTextLetterSpacing(vg, mm2px(0.08f));
 		for (int i = 0; i < 2; i++) {
 			bb::label(vg, Vec(KX[i], Y_ATTACK + BIG_R + 2.6f), "ATTACK", k.fg);
@@ -179,7 +183,7 @@ struct PanelArt : Widget {
 			bb::label(vg, Vec(KX[i], Y_TRIM + TRIM_R + 2.6f), string::f("LEVEL %d", i + 1).c_str(), k.fg);
 		}
 		bb::label(vg, Vec(CX, Y_TRIM + TRIM_R + 2.6f), "LINK", k.fg);
-		nvgFontSize(vg, mm2px(2.2f));
+		nvgFontSize(vg, mm2px(4.4f));
 		const char* rowA[5] = {"TRIG", "SLEW", "VCA 1", "TRIG", "SLEW"};
 		const char* rowB[5] = {"ATK", "DEC", "VCA 2", "ATK", "DEC"};
 		const char* rowC[5] = {"OUT 1", "EOC 1", "SUM", "OUT 2", "EOC 2"};
