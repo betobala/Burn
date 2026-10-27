@@ -2,7 +2,7 @@
 // Recreated from the published behaviour of the Cosmotronic Delta-V (docs/manual.txt).
 #include <rack.hpp>
 #include "Function.hpp"
-#include "Controls4ms.hpp"
+#include "Controls.hpp"
 #include "Stencil.hpp"
 
 using namespace rack;
