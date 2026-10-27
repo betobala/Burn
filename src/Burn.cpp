@@ -117,79 +117,76 @@ struct PanelArt : Widget {
 
 	void draw(const DrawArgs& args) override {
 		bb::Ink k = bb::ink(module ? module->theme : 0);
-		bb::Ink inv = {k.fg, k.bg};
 		NVGcontext* vg = args.vg;
 		nvgBeginPath(vg);
 		nvgRect(vg, 0, 0, box.size.x, box.size.y);
 		nvgFillColor(vg, k.bg);
 		nvgFill(vg);
 
-		// attack and decay of each channel in a notched frame
-		bb::notchedFrame(vg, Rect(Vec(1.4f, 9.8f), Vec(CX - 2.2f, 37.6f)), k);
-		bb::notchedFrame(vg, Rect(Vec(CX + 0.8f, 9.8f), Vec(CX - 2.2f, 37.6f)), k);
-		// a hazard strip splits the two channels in the shape row
-		bb::hazard(vg, Rect(Vec(CX - 1.1f, 49.0f), Vec(2.2f, 15.4f)), k, 1.8f);
-		bb::frame(vg, Rect(Vec(1.6f, 65.6f), Vec(W - 3.2f, 13.0f)), k);
-		for (int r = 0; r < 2; r++) {
-			float y = r == 0 ? ROW_A : ROW_B;
-			bb::frame(vg, Rect(Vec(1.6f, y - 4.6f), Vec(W - 3.2f, 13.0f)), k);
-			for (int j = 0; j < 4; j++)
-				bb::link(vg, JX[j], JX[j + 1], y, k, 3.6f);
-		}
-		bb::chamferPath(vg, Rect(Vec(1.6f, ROW_C - 4.6f), Vec(W - 3.2f, 13.0f)), 2.0f);
-		nvgFillColor(vg, k.fg);
-		nvgFill(vg);
+		// a vertical hairline splits the channels; rules over the jack rows
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, mm2px(CX), mm2px(11.0f));
+		nvgLineTo(vg, mm2px(CX), mm2px(62.0f));
+		nvgStrokeColor(vg, k.dim);
+		nvgStrokeWidth(vg, mm2px(0.25f));
+		nvgStroke(vg);
+		bb::rule(vg, 3.0f, W - 3.0f, ROW_A - 6.4f, k);
+		bb::rule(vg, 3.0f, W - 3.0f, ROW_C - 5.6f, k);
+		for (int j = 0; j < 5; j++)
+			bb::outRing(vg, Vec(JX[j], ROW_C), k, 4.1f);
 
 		// the shape scale: an arc with three dots (exp, lin, log) over each shape knob
 		for (int i = 0; i < 2; i++) {
 			float cx = mm2px(SX[i]), cy = mm2px(Y_SHAPE), r = mm2px(SHAPE_R + 2.2f);
 			nvgBeginPath(vg);
 			nvgArc(vg, cx, cy, r, -M_PI / 2 - 1.0f, -M_PI / 2 + 1.0f, NVG_CW);
-			nvgStrokeColor(vg, k.fg);
-			nvgStrokeWidth(vg, mm2px(0.35f));
+			nvgStrokeColor(vg, k.dim);
+			nvgStrokeWidth(vg, mm2px(0.3f));
 			nvgStroke(vg);
 			for (int d = -1; d <= 1; d++) {
 				float a = -M_PI / 2 + d * 1.0f;
 				nvgBeginPath(vg);
-				nvgCircle(vg, cx + std::cos(a) * r, cy + std::sin(a) * r, mm2px(0.6f));
-				nvgFillColor(vg, k.fg);
+				nvgCircle(vg, cx + std::cos(a) * r, cy + std::sin(a) * r, mm2px(0.5f));
+				nvgFillColor(vg, k.dim);
 				nvgFill(vg);
 			}
 		}
 
 		std::shared_ptr<window::Font> stencil = pluginFont("BlackOpsOne-Regular.ttf");
 		std::shared_ptr<window::Font> reg = pluginFont("SpaceMono-Regular.ttf");
-		if (!stencil || !reg)
+		std::shared_ptr<window::Font> bold = pluginFont("SpaceMono-Bold.ttf");
+		if (!stencil || !reg || !bold)
 			return;
-		bb::title(vg, Rect(Vec(12.4f, 1.4f), Vec(W - 24.8f, 6.0f)), "BURN", stencil->handle, k, 4.4f);
+		bb::nameplate(vg, CX, 4.4f, "BURN", stencil->handle, k, 4.4f);
 		nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 		nvgFontFaceId(vg, reg->handle);
 		nvgFontSize(vg, mm2px(1.9f));
-		nvgFillColor(vg, k.fg);
+		nvgFillColor(vg, k.dim);
 		for (int i = 0; i < 2; i++) {
 			float r = SHAPE_R + 2.2f;
 			text(vg, Vec(SX[i] - std::sin(1.0f) * r - 2.6f, Y_SHAPE - std::cos(1.0f) * r - 0.6f), "exp");
 			text(vg, Vec(SX[i] + std::sin(1.0f) * r + 2.6f, Y_SHAPE - std::cos(1.0f) * r - 0.6f), "log");
 		}
 
-		nvgFontFaceId(vg, stencil->handle);
-		nvgFontSize(vg, mm2px(2.2f));
+		nvgFontFaceId(vg, bold->handle);
+		nvgFontSize(vg, mm2px(2.4f));
 		nvgTextLetterSpacing(vg, mm2px(0.08f));
 		for (int i = 0; i < 2; i++) {
-			bb::plate(vg, Vec(KX[i], Y_ATTACK + BIG_R + 2.4f), "ATTACK", k, 13.0f);
-			bb::plate(vg, Vec(KX[i], Y_DECAY + BIG_R + 2.4f), "DECAY", k, 13.0f);
-			bb::plate(vg, Vec(SX[i], Y_SHAPE + SHAPE_R + 2.4f), "SHAPE", k, 9.0f);
-			bb::plate(vg, Vec(LFO_X[i], Y_SHAPE + 5.6f), "LFO", k, 6.6f);
-			bb::plate(vg, Vec(KX[i], Y_TRIM + TRIM_R + 2.4f), string::f("LEVEL %d", i + 1).c_str(), k, 9.0f);
+			bb::label(vg, Vec(KX[i], Y_ATTACK + BIG_R + 2.6f), "ATTACK", k.fg);
+			bb::label(vg, Vec(KX[i], Y_DECAY + BIG_R + 2.6f), "DECAY", k.fg);
+			bb::label(vg, Vec(SX[i], Y_SHAPE + SHAPE_R + 2.6f), "SHAPE", k.fg);
+			bb::label(vg, Vec(LFO_X[i], Y_SHAPE + 5.6f), "LFO", k.fg);
+			bb::label(vg, Vec(KX[i], Y_TRIM + TRIM_R + 2.6f), string::f("LEVEL %d", i + 1).c_str(), k.fg);
 		}
-		bb::plate(vg, Vec(CX, Y_TRIM + TRIM_R + 2.4f), "LINK", k, 7.0f);
+		bb::label(vg, Vec(CX, Y_TRIM + TRIM_R + 2.6f), "LINK", k.fg);
+		nvgFontSize(vg, mm2px(2.2f));
 		const char* rowA[5] = {"TRIG", "SLEW", "VCA 1", "TRIG", "SLEW"};
 		const char* rowB[5] = {"ATK", "DEC", "VCA 2", "ATK", "DEC"};
 		const char* rowC[5] = {"OUT 1", "EOC 1", "SUM", "OUT 2", "EOC 2"};
 		for (int j = 0; j < 5; j++) {
-			bb::plate(vg, Vec(JX[j], ROW_A + 5.0f), rowA[j], k, 7.6f, 2.8f);
-			bb::plate(vg, Vec(JX[j], ROW_B + 5.0f), rowB[j], k, 7.6f, 2.8f);
-			bb::plate(vg, Vec(JX[j], ROW_C + 5.0f), rowC[j], inv, 7.6f, 2.8f);
+			bb::label(vg, Vec(JX[j], ROW_A + 5.2f), rowA[j], k.fg);
+			bb::label(vg, Vec(JX[j], ROW_B + 5.2f), rowB[j], k.fg);
+			bb::label(vg, Vec(JX[j], ROW_C + 5.8f), rowC[j], k.red);
 		}
 		nvgTextLetterSpacing(vg, 0.f);
 	}
